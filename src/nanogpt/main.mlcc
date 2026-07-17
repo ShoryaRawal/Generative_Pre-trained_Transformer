@@ -1,0 +1,53 @@
+MODULE NanoGPTMain
+
+SUBROUTINE main()
+    PRINT("Starting NanoGPT (Shakespeare)")
+    
+    AUTO :: B = 4
+    AUTO :: T = 32
+    AUTO :: C = 32
+    AUTO :: vocab_size = 50257
+    
+    STRUCT(NanoGPTWeights) :: weights
+    weights.wte = RANDOM2(vocab_size, C)
+    weights.wpe = RANDOM2(T, C)
+    weights.ln_1_w = RANDOM2(C, 1)
+    weights.ln_1_b = RANDOM2(C, 1)
+    weights.attn_q_w = RANDOM2(C, C)
+    weights.attn_k_w = RANDOM2(C, C)
+    weights.attn_v_w = RANDOM2(C, C)
+    weights.attn_proj_w = RANDOM2(C, C)
+    weights.ln_2_w = RANDOM2(C, 1)
+    weights.ln_2_b = RANDOM2(C, 1)
+    weights.mlp_fc_w = RANDOM2(C, C * 4)
+    weights.mlp_proj_w = RANDOM2(C * 4, C)
+    weights.ln_f_w = RANDOM2(C, 1)
+    weights.ln_f_b = RANDOM2(C, 1)
+    weights.lm_head_w = RANDOM2(C, vocab_size)
+
+    REQUIRES_GRAD(weights.wte, 1)
+    REQUIRES_GRAD(weights.wpe, 1)
+    REQUIRES_GRAD(weights.ln_1_w, 1)
+    REQUIRES_GRAD(weights.ln_1_b, 1)
+    REQUIRES_GRAD(weights.attn_q_w, 1)
+    REQUIRES_GRAD(weights.attn_k_w, 1)
+    REQUIRES_GRAD(weights.attn_v_w, 1)
+    REQUIRES_GRAD(weights.attn_proj_w, 1)
+    REQUIRES_GRAD(weights.ln_2_w, 1)
+    REQUIRES_GRAD(weights.ln_2_b, 1)
+    REQUIRES_GRAD(weights.mlp_fc_w, 1)
+    REQUIRES_GRAD(weights.mlp_proj_w, 1)
+    REQUIRES_GRAD(weights.ln_f_w, 1)
+    REQUIRES_GRAD(weights.ln_f_b, 1)
+    REQUIRES_GRAD(weights.lm_head_w, 1)
+    
+    AUTO :: optim = ADAMW(weights.wte, weights.wpe, weights.ln_1_w, weights.ln_1_b, weights.attn_q_w, weights.attn_k_w, weights.attn_v_w, weights.attn_proj_w, weights.ln_2_w, weights.ln_2_b, weights.mlp_fc_w, weights.mlp_proj_w, weights.ln_f_w, weights.ln_f_b, weights.lm_head_w, 0.001)
+
+    AUTO :: epochs = 3
+    TRAIN(weights, optim, B, T, epochs, vocab_size)
+    
+    AUTO :: max_steps = 10
+    GENERATE(weights, vocab_size, max_steps)
+END SUBROUTINE
+
+END MODULE

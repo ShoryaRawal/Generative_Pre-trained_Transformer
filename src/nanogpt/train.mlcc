@@ -1,0 +1,32 @@
+MODULE NanoGPTTrain
+
+SUBROUTINE TRAIN(weights: STRUCT(NanoGPTWeights), optim: OPTIMIZER, B: INTEGER, T: INTEGER, epochs: INTEGER, vocab_size: INTEGER)
+    PRINT("Loading Shakespeare data...")
+    AUTO :: x_batch_flat = LOAD_I16("Data/shakespeare/train.bin", B * T)
+    AUTO :: x_batch = VIEW2(x_batch_flat, B, T)
+    AUTO :: y_batch_flat = LOAD_I16("Data/shakespeare/val.bin", B * T)
+    AUTO :: y_batch = VIEW2(y_batch_flat, B, T)
+
+    AUTO :: i = 0
+    AUTO :: logits = RANDOM2(1, 1)
+    AUTO :: logits_flat = RANDOM2(1, 1)
+    AUTO :: loss = RANDOM2(1, 1)
+
+    FOR i IN 0..epochs
+        logits = TRANSFORMER_FORWARD(x_batch, weights, T)
+        
+        logits_flat = VIEW2(logits, B * T, vocab_size)
+        loss = CROSS_ENTROPY(logits_flat, y_batch_flat)
+        
+        PRINT("Epoch Loss")
+        PRINT(loss)
+        
+        ZERO_GRAD(optim)
+        BACKWARD(loss)
+        STEP(optim)
+    END FOR
+
+    PRINT("Training Complete")
+END SUBROUTINE
+
+END MODULE

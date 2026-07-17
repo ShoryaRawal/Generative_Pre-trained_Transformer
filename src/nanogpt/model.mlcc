@@ -1,0 +1,57 @@
+MODULE NanoGPTModel
+
+STRUCT NanoGPTWeights
+    TENSOR :: wte
+    TENSOR :: wpe
+    TENSOR :: ln_1_w
+    TENSOR :: ln_1_b
+    TENSOR :: attn_q_w
+    TENSOR :: attn_k_w
+    TENSOR :: attn_v_w
+    TENSOR :: attn_proj_w
+    TENSOR :: ln_2_w
+    TENSOR :: ln_2_b
+    TENSOR :: mlp_fc_w
+    TENSOR :: mlp_proj_w
+    TENSOR :: ln_f_w
+    TENSOR :: ln_f_b
+    TENSOR :: lm_head_w
+END STRUCT
+
+
+
+SUBROUTINE TRANSFORMER_BLOCK(x: TENSOR, weights: STRUCT(NanoGPTWeights))
+    AUTO :: h_norm = LAYER_NORM(x, weights.ln_1_w, weights.ln_1_b)
+    
+    AUTO :: q = MATMUL(h_norm, weights.attn_q_w)
+    AUTO :: k = MATMUL(h_norm, weights.attn_k_w)
+    AUTO :: v = MATMUL(h_norm, weights.attn_v_w)
+    
+    AUTO :: attn_out = ATTENTION(q, k, v)
+    AUTO :: attn_proj = MATMUL(attn_out, weights.attn_proj_w)
+    AUTO :: h = x + attn_proj
+    
+    AUTO :: h_norm2 = LAYER_NORM(h, weights.ln_2_w, weights.ln_2_b)
+    
+    AUTO :: mlp_fc = MATMUL(h_norm2, weights.mlp_fc_w)
+    AUTO :: mlp_act = GELU(mlp_fc)
+    AUTO :: mlp_proj = MATMUL(mlp_act, weights.mlp_proj_w)
+    AUTO :: out = h + mlp_proj
+    
+    RETURN out
+END SUBROUTINE
+
+SUBROUTINE TRANSFORMER_FORWARD(x: TENSOR, weights: STRUCT(NanoGPTWeights), T: INTEGER)
+    AUTO :: tok_emb = EMBEDDING(weights.wte, x)
+    AUTO :: wpe_sliced = SLICE(weights.wpe, 0, 0, T)
+    AUTO :: h = tok_emb + wpe_sliced
+    
+    h = TRANSFORMER_BLOCK(h, weights)
+    
+    AUTO :: h_norm_f = LAYER_NORM(h, weights.ln_f_w, weights.ln_f_b)
+    AUTO :: logits = MATMUL(h_norm_f, weights.lm_head_w)
+    
+    RETURN logits
+END SUBROUTINE
+
+END MODULE

@@ -1,0 +1,7 @@
+MODULE DecodeModule
+
+SUBROUTINE main()
+    SYSTEM(".venv/bin/python decode.py")
+END SUBROUTINE
+
+END MODULE

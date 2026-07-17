@@ -1,0 +1,27 @@
+MODULE NanoGPTGenerate
+
+SUBROUTINE GENERATE(weights: STRUCT(NanoGPTWeights), vocab_size: INTEGER, max_steps: INTEGER)
+    PRINT("Generating text...")
+    
+    AUTO :: ctx = LOAD_I16("Data/shakespeare/train.bin", 1)
+    ctx = VIEW2(ctx, 1, 1)
+    
+    AUTO :: step = 0
+    AUTO :: logits = RANDOM2(1, 1)
+    AUTO :: logits_flat = RANDOM2(1, 1)
+    AUTO :: probs = RANDOM2(1, 1)
+    AUTO :: next_tok = RANDOM2(1, 1)
+
+    FOR step IN 0..max_steps
+        logits = TRANSFORMER_FORWARD(ctx, weights, 1)
+        
+        logits_flat = VIEW2(logits, 1, vocab_size)
+        probs = SOFTMAX(logits_flat)
+        next_tok = MULTINOMIAL(probs, 1)
+        
+        PRINT_TOKEN(next_tok)
+        ctx = CLONE(next_tok)
+    END FOR
+END SUBROUTINE
+
+END MODULE
