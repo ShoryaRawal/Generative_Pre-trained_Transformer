@@ -54,7 +54,7 @@ python3 Data/openwebtext/prepare.py
 ### 2. Compile the GPT Model
 Use the freshly built MLCC compiler to compile the `.mlcc` source files into a native executable.
 ```bash
-./compiler/build/my_compiler src/main.mlcc
+./compiler/build/mlcc src/main.mlcc
 ```
 This parses the model architecture, training loop, and inference loop into MLIR, lowers it to LLVM, and produces a native executable (typically `a.out`).
 
