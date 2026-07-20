@@ -1,7 +1,7 @@
 MODULE NanoGPTMain
 
 SUBROUTINE main()
-    PRINT("Starting NanoGPT (Shakespeare)")
+    PRINT("Starting NanoGPT")
     
     AUTO :: B = 4
     AUTO :: T = 32
