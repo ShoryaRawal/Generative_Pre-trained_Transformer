@@ -72,7 +72,3 @@ When you run the compiled binary, it:
 3. Runs the training loop, automatically computing cross-entropy loss, applying gradients, and printing the step performance (loss and speed).
 4. Periodically saves the model checkpoints.
 5. In inference mode, it drops into an interactive loop where you can prompt the compiled GPT model and it streams tokens back natively.
-
-## License
-
-MIT
